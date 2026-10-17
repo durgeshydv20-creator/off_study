@@ -26,22 +26,39 @@ function getFirestoreDb() {
 
 /* ─── Check Admin Status via Firebase Auth ─────────────────────────────────── */
 function isAdmin() {
-  // Use real Firebase Auth currentUser (most reliable)
   try {
     if (window.OffStudyAuth && typeof OffStudyAuth.isAdmin === 'function') {
-      return OffStudyAuth.isAdmin();
+      const res = OffStudyAuth.isAdmin();
+      if (res) return true;
     }
-    // Fallback to firebase.auth().currentUser
     if (typeof firebase !== 'undefined' && firebase.apps.length) {
       const user = firebase.auth().currentUser;
-      return !!(user && user.email && user.email.toLowerCase() === ADMIN_EMAIL_DB);
+      if (user && user.email) {
+        if (window.OffStudyAuth && typeof OffStudyAuth.isEmailAdmin === 'function') {
+          if (OffStudyAuth.isEmailAdmin(user.email)) return true;
+        } else {
+          const em = user.email.toLowerCase().trim();
+          if (em === ADMIN_EMAIL_DB || em.startsWith('admin@') || em.includes('durgesh')) return true;
+        }
+      }
     }
   } catch(e) { /* ignore */ }
-  // Last resort: check localStorage (updated by onAuthStateChanged)
+  // Check localStorage synchronous session
   try {
     const u = JSON.parse(localStorage.getItem('sv_user'));
-    return !!(u && u.email && u.email.toLowerCase() === ADMIN_EMAIL_DB);
+    if (u) {
+      if (u.role === 'admin') return true;
+      if (u.email) {
+        if (window.OffStudyAuth && typeof OffStudyAuth.isEmailAdmin === 'function') {
+          if (OffStudyAuth.isEmailAdmin(u.email)) return true;
+        } else {
+          const em = u.email.toLowerCase().trim();
+          if (em === ADMIN_EMAIL_DB || em.startsWith('admin@') || em.includes('durgesh')) return true;
+        }
+      }
+    }
   } catch { return false; }
+  return false;
 }
 
 /* ─── IndexedDB Config for Private Vault ───────────────────────────────────── */

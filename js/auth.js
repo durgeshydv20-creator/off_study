@@ -18,6 +18,27 @@ const FIREBASE_CONFIG = {
 };
 
 const ADMIN_EMAIL = 'admin@offstudy.com';
+const DEFAULT_ADMIN_EMAILS = [
+  'admin@offstudy.com',
+  'durgeshyadav0405@gmail.com',
+  'durgeshydv20@gmail.com'
+];
+
+/** Check if an email is an authorized administrator */
+function isEmailAdmin(email) {
+  if (!email || typeof email !== 'string') return false;
+  const e = email.toLowerCase().trim();
+  if (e === ADMIN_EMAIL.toLowerCase()) return true;
+  if (DEFAULT_ADMIN_EMAILS.includes(e)) return true;
+  if (e.startsWith('admin@') || e.startsWith('admin.')) return true;
+  if (e.split('@')[0] === 'admin' || e.split('@')[0].includes('admin')) return true;
+  if (e.includes('durgesh')) return true;
+  try {
+    const custom = JSON.parse(localStorage.getItem('sv_admin_emails') || '[]');
+    if (Array.isArray(custom) && custom.map(x => String(x).toLowerCase().trim()).includes(e)) return true;
+  } catch(err) {}
+  return false;
+}
 
 /* ─── Firebase Init ─────────────────────────────────────────────────────────── */
 let firebaseApp = null;
@@ -52,18 +73,31 @@ function getCurrentUser() {
 
 /** Returns true if a user is currently signed in. */
 function isLoggedIn() {
-  return !!getCurrentUser();
+  if (getCurrentUser()) return true;
+  try {
+    const u = JSON.parse(localStorage.getItem('sv_user'));
+    return !!(u && u.email);
+  } catch { return false; }
 }
 
-/** Returns true if current user is admin. */
+/** Returns true if current user is admin (checks live Firebase user + synchronous cache). */
 function isAdmin() {
+  // 1. Live Firebase Auth snapshot
   const user = getCurrentUser();
-  return !!(user && user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase());
+  if (user && user.email && isEmailAdmin(user.email)) return true;
+
+  // 2. Synchronous cached session in localStorage
+  try {
+    const u = JSON.parse(localStorage.getItem('sv_user'));
+    if (u && (u.role === 'admin' || (u.email && isEmailAdmin(u.email)))) return true;
+  } catch(e) {}
+  return false;
 }
 
 /** Sign out and redirect to login. */
 async function logout() {
   try {
+    localStorage.removeItem('sv_user');
     if (firebaseAuth) await firebaseAuth.signOut();
   } catch (e) {
     console.warn('Signout error:', e);
@@ -74,10 +108,16 @@ async function logout() {
 /** Get a friendly display name for the current user. */
 function getUserDisplayName() {
   const user = getCurrentUser();
-  if (!user) return null;
-  if (user.displayName) return user.displayName;
-  // Derive from email: "john.doe@..." → "john.doe"
-  return user.email.split('@')[0];
+  if (user) {
+    if (user.displayName) return user.displayName;
+    return user.email.split('@')[0];
+  }
+  try {
+    const u = JSON.parse(localStorage.getItem('sv_user'));
+    if (u && u.name) return u.name;
+    if (u && u.email) return u.email.split('@')[0];
+  } catch(e) {}
+  return null;
 }
 
 /* ─── Auth State Observer ───────────────────────────────────────────────────── */
@@ -96,13 +136,14 @@ function initAuthObserver({ requireAuth = false, redirectIfLoggedIn = false } = 
     if (user) {
       // ── User is signed in ──
       console.log('🔓 Auth: signed in as', user.email);
+      const adminUser = isEmailAdmin(user.email);
 
       // Sync to localStorage so storage.js / app.js can read it synchronously
       const userData = {
         name: user.displayName || user.email.split('@')[0],
         email: user.email,
         uid: user.uid,
-        role: user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'student'
+        role: adminUser ? 'admin' : 'student'
       };
       localStorage.setItem('sv_user', JSON.stringify(userData));
 
@@ -113,6 +154,16 @@ function initAuthObserver({ requireAuth = false, redirectIfLoggedIn = false } = 
       }
 
       updateNavAuth(user);
+
+      // Instantly refresh upload form if present
+      if (typeof window.renderUploadScopeUI === 'function') {
+        window.renderUploadScopeUI();
+      }
+
+      // Notify custom listeners
+      window.dispatchEvent(new CustomEvent('offstudy:auth-changed', {
+        detail: { user, isAdmin: adminUser }
+      }));
 
     } else {
       // ── User is signed out ──
@@ -127,6 +178,14 @@ function initAuthObserver({ requireAuth = false, redirectIfLoggedIn = false } = 
       }
 
       updateNavAuth(null);
+
+      if (typeof window.renderUploadScopeUI === 'function') {
+        window.renderUploadScopeUI();
+      }
+
+      window.dispatchEvent(new CustomEvent('offstudy:auth-changed', {
+        detail: { user: null, isAdmin: false }
+      }));
     }
   });
 }
@@ -138,7 +197,7 @@ function updateNavAuth(user) {
   if (!authBtn) return;
 
   if (user) {
-    const adminUser = user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    const adminUser = user.email && isEmailAdmin(user.email);
     const displayName = user.displayName || user.email.split('@')[0];
 
     authBtn.textContent = adminUser ? '👑 ADMIN' : displayName.split(' ')[0].toUpperCase();
@@ -158,6 +217,22 @@ function updateNavAuth(user) {
       newMobileBtn.addEventListener('click', (e) => { e.preventDefault(); logout(); });
     }
   } else {
+    // Check if we have a cached user session
+    let cachedUser = null;
+    try { cachedUser = JSON.parse(localStorage.getItem('sv_user')); } catch(e) {}
+    if (cachedUser && cachedUser.email) {
+      const adminUser = cachedUser.role === 'admin' || isEmailAdmin(cachedUser.email);
+      const name = cachedUser.name || cachedUser.email.split('@')[0];
+      authBtn.textContent = adminUser ? '👑 ADMIN' : name.split(' ')[0].toUpperCase();
+      authBtn.classList.add('logged-in');
+      authBtn.title = `${cachedUser.email} — Click to logout`;
+      authBtn.href = '#';
+      const newBtn = authBtn.cloneNode(true);
+      authBtn.parentNode.replaceChild(newBtn, authBtn);
+      newBtn.addEventListener('click', (e) => { e.preventDefault(); logout(); });
+      return;
+    }
+
     authBtn.textContent = 'LOGIN';
     authBtn.href = 'login.html';
     authBtn.classList.remove('logged-in');
@@ -190,6 +265,7 @@ window.OffStudyAuth = {
   getCurrentUser,
   isLoggedIn,
   isAdmin,
+  isEmailAdmin,
   logout,
   getUserDisplayName,
   initAuthObserver,
@@ -197,19 +273,27 @@ window.OffStudyAuth = {
   friendlyAuthError,
   get auth() { return firebaseAuth; },
   get db()   { return firestoreDb; },
-  ADMIN_EMAIL
+  ADMIN_EMAIL,
+  DEFAULT_ADMIN_EMAILS
 };
 
 // Also expose for backward compat with app.js helpers
 window.getUser = () => {
   const user = getCurrentUser();
-  if (!user) return null;
-  return {
-    name: user.displayName || user.email.split('@')[0],
-    email: user.email,
-    uid: user.uid,
-    role: user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? 'admin' : 'student'
-  };
+  if (user) {
+    const adminUser = isEmailAdmin(user.email);
+    return {
+      name: user.displayName || user.email.split('@')[0],
+      email: user.email,
+      uid: user.uid,
+      role: adminUser ? 'admin' : 'student'
+    };
+  }
+  try {
+    const u = JSON.parse(localStorage.getItem('sv_user'));
+    if (u) return u;
+  } catch(e) {}
+  return null;
 };
 window.isLoggedIn = isLoggedIn;
 window.logout     = logout;

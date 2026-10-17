@@ -94,20 +94,42 @@ function initDropZone() {
 
 /* ─── Render Scope UI (Admin vs Student Private Vault) ────────────────────── */
 function renderUploadScopeUI() {
-  const container = document.getElementById('upload-scope-container');
+  let container = document.getElementById('upload-scope-container');
+  const form = document.getElementById('upload-form');
+  if (!container && form) {
+    container = document.createElement('div');
+    container.id = 'upload-scope-container';
+    form.insertBefore(container, form.firstChild);
+  }
   if (!container) return;
 
-  const isAdmin = typeof SV !== 'undefined' && SV.isAdmin && SV.isAdmin();
+  const isAdmin = (typeof SV !== 'undefined' && SV.isAdmin && SV.isAdmin()) ||
+                  (typeof OffStudyAuth !== 'undefined' && OffStudyAuth.isAdmin && OffStudyAuth.isAdmin()) ||
+                  (typeof OffStudyDB !== 'undefined' && OffStudyDB.isAdmin && OffStudyDB.isAdmin());
+
+  const cardSub = document.querySelector('.upload-card-sub');
+  const sectionTag = document.querySelector('.upload-card-header .section-tag');
+  const submitBtn = document.getElementById('upload-submit-btn');
+
   if (isAdmin) {
+    if (sectionTag) sectionTag.innerHTML = `👑 Admin Publishing Mode`;
+    if (cardSub) cardSub.innerHTML = `Upload verified study material directly to <strong>OffStudy Official Cloud</strong> for all students, or save privately.`;
+    if (submitBtn && submitBtn.textContent.trim().toUpperCase() === 'UPLOAD') {
+      submitBtn.innerHTML = `PUBLISH TO CLOUD <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+    }
+
     container.innerHTML = `
       <div class="form-group" style="margin-bottom:20px;">
-        <label class="form-label">👑 Admin Publishing Mode</label>
+        <label class="form-label" style="display:flex; justify-content:space-between; align-items:center;">
+          <span>👑 Admin Publishing Mode</span>
+          <span style="font-size:11px; color:var(--accent); font-weight:600; text-transform:none;">Official Cloud Upload</span>
+        </label>
         <div class="scope-selector">
           <label class="scope-option active" id="scope-opt-official">
             <input type="radio" name="upload-scope" value="official" checked>
             <span class="scope-icon">🌐</span>
             <div>
-              <div class="scope-title">Publish as Official OffStudy Material (Cloud)</div>
+              <div class="scope-title">Publish to OffStudy Official Cloud</div>
               <div class="scope-desc">Published globally. Every student visiting OffStudy can view &amp; download this note.</div>
             </div>
           </label>
@@ -130,13 +152,20 @@ function renderUploadScopeUI() {
         if (r.value === 'official') {
           optOff?.classList.add('active');
           optPriv?.classList.remove('active');
+          if (submitBtn) submitBtn.innerHTML = `PUBLISH TO CLOUD <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
         } else {
           optPriv?.classList.add('active');
           optOff?.classList.remove('active');
+          if (submitBtn) submitBtn.innerHTML = `SAVE TO VAULT <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
         }
       });
     });
   } else {
+    if (sectionTag) sectionTag.innerHTML = `Upload System`;
+    if (cardSub) cardSub.innerHTML = `Add PDFs, documents, presentations or images to your personal vault.`;
+    if (submitBtn && submitBtn.textContent.trim().toUpperCase() !== 'UPLOADING...') {
+      submitBtn.innerHTML = `UPLOAD <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+    }
     container.innerHTML = `
       <div class="private-vault-notice">
         <span class="pvn-icon">🔒</span>
@@ -301,4 +330,13 @@ document.addEventListener('DOMContentLoaded', () => {
   renderUploadScopeUI();
 });
 
+// Re-render immediately whenever auth state is updated or restored
+window.addEventListener('offstudy:auth-changed', () => {
+  renderUploadScopeUI();
+});
+window.addEventListener('storage', (e) => {
+  if (e.key === 'sv_user') renderUploadScopeUI();
+});
+
 window.openUploadModal = openUploadModal;
+window.renderUploadScopeUI = renderUploadScopeUI;

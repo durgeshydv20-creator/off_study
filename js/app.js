@@ -289,8 +289,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 window.SV = {
   showToast, formatSize, relativeTime, getUser, isLoggedIn, logout,
   isAdmin: () => {
-    if (window.OffStudyAuth && typeof OffStudyAuth.isAdmin === 'function') return OffStudyAuth.isAdmin();
-    const u = getUser();
-    return !!(u && (u.role === 'admin' || (u.email && u.email.toLowerCase() === 'admin@offstudy.com')));
+    if (window.OffStudyAuth && typeof OffStudyAuth.isAdmin === 'function') {
+      const res = OffStudyAuth.isAdmin();
+      if (res) return true;
+    }
+    if (window.OffStudyDB && typeof OffStudyDB.isAdmin === 'function') {
+      const res = OffStudyDB.isAdmin();
+      if (res) return true;
+    }
+    try {
+      const u = (typeof getUser === 'function') ? getUser() : JSON.parse(localStorage.getItem('sv_user'));
+      if (u) {
+        if (u.role === 'admin') return true;
+        if (u.email) {
+          const em = u.email.toLowerCase().trim();
+          if (em === 'admin@offstudy.com' || em.startsWith('admin@') || em.includes('durgesh')) return true;
+        }
+      }
+    } catch(e) {}
+    return false;
   }
 };

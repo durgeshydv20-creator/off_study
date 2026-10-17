@@ -296,9 +296,21 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
       rememberMe ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION
     );
 
-    await OffStudyAuth.auth.signInWithEmailAndPassword(email, pass);
+    const cred = await OffStudyAuth.auth.signInWithEmailAndPassword(email, pass);
 
-    // Redirect (onAuthStateChanged will fire and update navbar on next page)
+    // Save session synchronously to localStorage BEFORE redirecting to prevent race condition
+    if (cred && cred.user) {
+      const isAdm = OffStudyAuth.isEmailAdmin ? OffStudyAuth.isEmailAdmin(cred.user.email) : cred.user.email.toLowerCase().includes('admin');
+      const userData = {
+        name: cred.user.displayName || cred.user.email.split('@')[0],
+        email: cred.user.email,
+        uid: cred.user.uid,
+        role: isAdm ? 'admin' : 'student'
+      };
+      localStorage.setItem('sv_user', JSON.stringify(userData));
+    }
+
+    // Redirect (onAuthStateChanged will also verify on destination page)
     const redirectTo = sessionStorage.getItem('sv_redirect_after_login') || 'index.html';
     sessionStorage.removeItem('sv_redirect_after_login');
     window.location.href = redirectTo;

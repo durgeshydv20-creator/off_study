@@ -372,6 +372,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { closeViewer(); }
   });
+
+  // Re-render notes when auth state resolves (e.g. admin delete buttons appear)
+  window.addEventListener('offstudy:auth-changed', () => {
+    loadNotes();
+  });
 });
 
 // Expose for search.js
