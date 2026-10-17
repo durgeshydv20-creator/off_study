@@ -251,7 +251,9 @@ async function submitUpload() {
   }
 
   const scopeRadio = document.querySelector('input[name="upload-scope"]:checked');
-  const isAdmin = typeof SV !== 'undefined' && SV.isAdmin && SV.isAdmin();
+  const isAdmin = (typeof SV !== 'undefined' && SV.isAdmin && SV.isAdmin()) ||
+                  (typeof OffStudyAuth !== 'undefined' && OffStudyAuth.isAdmin && OffStudyAuth.isAdmin()) ||
+                  (typeof OffStudyDB !== 'undefined' && OffStudyDB.isAdmin && OffStudyDB.isAdmin());
   const isOfficial = isAdmin ? (!scopeRadio || scopeRadio.value === 'official') : false;
 
   try {
@@ -273,7 +275,11 @@ async function submitUpload() {
     if (isOfficial) {
       SV.showToast('Published to OffStudy Official Cloud! 🌐', 'success');
     } else {
-      SV.showToast('Saved to your Private Student Vault! 🔒', 'success');
+      if (isAdmin) {
+        SV.showToast('Saved to your Private Admin Vault! 🔒 (Only you can see this)', 'success');
+      } else {
+        SV.showToast('Saved to your Private Student Vault! 🔒 (Only you can see this)', 'success');
+      }
     }
 
     // Refresh notes list if on notes page

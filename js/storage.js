@@ -61,9 +61,48 @@ function isAdmin() {
   return false;
 }
 
+/** Get current active session user info (UID, email, name, role) */
+function getCurrentUserInfo() {
+  let uid = '';
+  let email = '';
+  let name = '';
+  let role = 'student';
+
+  try {
+    if (window.OffStudyAuth && typeof OffStudyAuth.getCurrentUser === 'function') {
+      const u = OffStudyAuth.getCurrentUser();
+      if (u) {
+        uid = u.uid || '';
+        email = (u.email || '').toLowerCase().trim();
+        name = u.displayName || '';
+      }
+    }
+  } catch(e) {}
+
+  if (!email || !uid) {
+    try {
+      const u = JSON.parse(localStorage.getItem('sv_user'));
+      if (u) {
+        if (!uid && u.uid) uid = u.uid;
+        if (!email && u.email) email = (u.email || '').toLowerCase().trim();
+        if (!name && u.name) name = u.name;
+        if (u.role) role = u.role;
+      }
+    } catch(e) {}
+  }
+
+  const isAdm = (window.OffStudyAuth && typeof OffStudyAuth.isEmailAdmin === 'function')
+    ? OffStudyAuth.isEmailAdmin(email)
+    : (email === ADMIN_EMAIL_DB || email.startsWith('admin@') || email.includes('durgesh'));
+
+  if (isAdm) role = 'admin';
+
+  return { uid, email, name, role, isAdmin: isAdm };
+}
+
 /* ─── IndexedDB Config for Private Vault ───────────────────────────────────── */
 const LOCAL_DB_NAME = 'OffStudyPrivateVault';
-const LOCAL_DB_VERSION = 1;
+const LOCAL_DB_VERSION = 2;
 const LOCAL_STORE_NAME = 'private_notes';
 
 function openPrivateDB() {
@@ -76,6 +115,12 @@ function openPrivateDB() {
         const store = db.createObjectStore(LOCAL_STORE_NAME, { keyPath: 'id' });
         store.createIndex('subject', 'subject', { unique: false });
         store.createIndex('uploadDate', 'uploadDate', { unique: false });
+        store.createIndex('userEmail', 'userEmail', { unique: false });
+        store.createIndex('userId', 'userId', { unique: false });
+      } else {
+        const store = req.transaction.objectStore(LOCAL_STORE_NAME);
+        if (!store.indexNames.contains('userEmail')) store.createIndex('userEmail', 'userEmail', { unique: false });
+        if (!store.indexNames.contains('userId')) store.createIndex('userId', 'userId', { unique: false });
       }
     };
     req.onsuccess = (e) => resolve(e.target.result);
@@ -118,19 +163,22 @@ function dataURLtoBlob(dataurl) {
 /**
  * Add a note:
  * - If isOfficial (Admin): Uploads to Firebase Cloud for everyone.
- * - If not isOfficial (Student): Saves ONLY to Private Local Vault on this device.
+ * - If not isOfficial (Student or Admin Private): Saves strictly to Private Vault for that specific user.
  */
 async function addNote(note, options = {}) {
   const noteId = note.id || ('note-' + Date.now() + '-' + Math.random().toString(36).slice(2));
   note.id = noteId;
 
-  // Determine whether this is Official (Cloud) or Private (Local)
-  // Only an Admin can publish official notes to Cloud
-  const canPublishCloud = isAdmin();
+  const currentUser = getCurrentUserInfo();
+  const canPublishCloud = currentUser.isAdmin;
   const isOfficial = canPublishCloud && (options.isOfficial !== false);
 
   note.isOfficial = isOfficial;
-  note.author = isOfficial ? 'OffStudy Official' : (options.author || 'Private Student Vault');
+  note.userId = currentUser.uid || '';
+  note.userEmail = currentUser.email || '';
+  note.author = isOfficial
+    ? 'OffStudy Official'
+    : (currentUser.name ? `${currentUser.name} (Private)` : 'Personal Vault');
 
   // Convert blob to DataURL if needed
   let dataUrl = null;
@@ -144,7 +192,7 @@ async function addNote(note, options = {}) {
 
   if (isOfficial) {
     // ══════════════════════════════════════════════════════════════
-    // CLOUD UPLOAD (ADMIN ONLY -> Visible to ALL students)
+    // CLOUD UPLOAD (ADMIN ONLY -> Published globally for all students)
     // ══════════════════════════════════════════════════════════════
     const firestoreDb = getFirestoreDb();
     if (!firestoreDb) {
@@ -166,6 +214,8 @@ async function addNote(note, options = {}) {
       uploadDate: note.uploadDate || new Date().toISOString(),
       isOfficial: true,
       author: 'OffStudy Official',
+      uploadedBy: currentUser.email || 'Admin',
+      uploaderUid: currentUser.uid || '',
       hasChunks: !!isLarge
     };
 
@@ -173,8 +223,7 @@ async function addNote(note, options = {}) {
       cloudDoc.fileData = dataUrl;
     }
 
-    const db = getFirestoreDb();
-    const docRef = db.collection('notes').doc(noteId);
+    const docRef = firestoreDb.collection('notes').doc(noteId);
     await docRef.set(cloudDoc);
 
     if (isLarge && dataUrl) {
@@ -191,12 +240,14 @@ async function addNote(note, options = {}) {
 
   } else {
     // ══════════════════════════════════════════════════════════════
-    // PRIVATE STUDENT VAULT (Local only -> Never sent to cloud)
+    // PRIVATE VAULT (Personal -> STRICTLY visible only to this user)
     // ══════════════════════════════════════════════════════════════
     const privateNote = {
       ...note,
       isOfficial: false,
-      author: 'My Private Vault'
+      userId: currentUser.uid || '',
+      userEmail: currentUser.email || '',
+      author: currentUser.isAdmin ? 'Admin (Private Vault)' : (currentUser.name ? `${currentUser.name} (Private)` : 'Personal Vault')
     };
 
     const localDb = await openPrivateDB();
@@ -209,7 +260,7 @@ async function addNote(note, options = {}) {
         tx.onerror = () => reject(tx.error);
         tx.onabort = () => reject(tx.error);
       });
-      console.log('🔒 Note saved to Personal Private Vault (local only):', noteId);
+      console.log('🔒 Note saved to Personal Private Vault for:', currentUser.email || 'user', noteId);
     }
   }
 
@@ -218,16 +269,21 @@ async function addNote(note, options = {}) {
 
 /**
  * Return notes:
- * - scope: 'all' (Official Cloud Notes + Student's Private Notes)
+ * - scope: 'all' (Official Cloud Notes + CURRENT USER's Private Notes)
  * - scope: 'official' (Only Official Notes by OffStudy)
- * - scope: 'private' (Only Student's Private Notes)
+ * - scope: 'private' (Only CURRENT USER's Private Notes)
+ * 
+ * IMPORTANT:
+ * - A student's private notes NEVER appear in the Admin's panel!
+ * - If Admin uploads private notes, they ONLY appear in Admin's own private vault!
  */
 async function getNotes(options = {}) {
   const scope = options.scope || 'all';
+  const currentUser = getCurrentUserInfo();
   let officialNotes = [];
   let privateNotes = [];
 
-  // 1. Fetch Official Notes from Firebase Cloud (if requested)
+  // 1. Fetch Official Notes from Firebase Cloud (Publicly available to all)
   if (scope === 'all' || scope === 'official') {
     const firestoreDb = getFirestoreDb();
     if (firestoreDb) {
@@ -235,6 +291,20 @@ async function getNotes(options = {}) {
         const snap = await firestoreDb.collection('notes').orderBy('uploadDate', 'desc').get();
         snap.forEach(doc => {
           const data = doc.data();
+
+          // If note is explicitly marked private in cloud, only the owner can see it
+          if (data.isOfficial === false || data.scope === 'private') {
+            const ownerEmail = (data.userEmail || data.uploadedBy || '').toLowerCase().trim();
+            const ownerUid = data.uploaderUid || data.userId || '';
+            const isOwner = (currentUser.uid && ownerUid === currentUser.uid) ||
+                            (currentUser.email && ownerEmail === currentUser.email);
+            if (isOwner && (scope === 'all' || scope === 'private')) {
+              privateNotes.push({ ...data, isOfficial: false });
+            }
+            return;
+          }
+
+          // Published official study material
           data.isOfficial = true;
           officialNotes.push(data);
         });
@@ -244,26 +314,46 @@ async function getNotes(options = {}) {
     }
   }
 
-  // 2. Fetch Personal Notes from Student's Private Local Vault (if requested)
+  // 2. Fetch Personal Notes from IndexedDB Private Vault (STRICT USER ISOLATION)
   if (scope === 'all' || scope === 'private') {
     try {
       const localDb = await openPrivateDB();
       if (localDb) {
-        privateNotes = await new Promise((resolve) => {
+        const allLocal = await new Promise((resolve) => {
           const tx = localDb.transaction(LOCAL_STORE_NAME, 'readonly');
           const store = tx.objectStore(LOCAL_STORE_NAME);
           const req = store.getAll();
           req.onsuccess = () => resolve(req.result || []);
           req.onerror = () => resolve([]);
         });
-        privateNotes.forEach(n => { n.isOfficial = false; });
+
+        allLocal.forEach(n => {
+          const noteOwnerEmail = (n.userEmail || n.ownerEmail || '').toLowerCase().trim();
+          const noteOwnerUid = n.userId || n.uploaderUid || '';
+
+          // Match ownership strictly
+          if (noteOwnerEmail || noteOwnerUid) {
+            const isOwner = (currentUser.uid && noteOwnerUid === currentUser.uid) ||
+                            (currentUser.email && noteOwnerEmail === currentUser.email);
+            if (isOwner) {
+              privateNotes.push({ ...n, isOfficial: false });
+            }
+          } else {
+            // Legacy untagged notes in browser:
+            // Admin must NEVER see other users' untagged private notes!
+            // Only regular student on this machine can see them.
+            if (!currentUser.isAdmin && currentUser.email) {
+              privateNotes.push({ ...n, isOfficial: false });
+            }
+          }
+        });
       }
     } catch (err) {
       console.warn('Could not fetch private notes:', err);
     }
   }
 
-  // Merge according to scope
+  // Merge according to requested scope
   let combined = [];
   if (scope === 'official') combined = officialNotes;
   else if (scope === 'private') combined = privateNotes;
@@ -274,8 +364,10 @@ async function getNotes(options = {}) {
   return combined;
 }
 
-/** Return single note by id (searches cloud and private vault) */
+/** Return single note by id (searches cloud and private vault with access check) */
 async function getNote(id) {
+  const currentUser = getCurrentUserInfo();
+
   // 1. Check Student's Private Vault first
   try {
     const localDb = await openPrivateDB();
@@ -286,9 +378,29 @@ async function getNote(id) {
         req.onsuccess = () => resolve(req.result || null);
         req.onerror = () => resolve(null);
       });
+
       if (privateNote) {
-        privateNote.isOfficial = false;
-        return privateNote;
+        const ownerEmail = (privateNote.userEmail || privateNote.ownerEmail || '').toLowerCase().trim();
+        const ownerUid = privateNote.userId || privateNote.uploaderUid || '';
+
+        // If note has owner info, verify access
+        if (ownerEmail || ownerUid) {
+          const isOwner = (currentUser.uid && ownerUid === currentUser.uid) ||
+                          (currentUser.email && ownerEmail === currentUser.email);
+          if (isOwner) {
+            privateNote.isOfficial = false;
+            return privateNote;
+          }
+          // Not the owner -> access denied
+          return null;
+        } else {
+          // Untagged note: allow only non-admin on this device
+          if (!currentUser.isAdmin && currentUser.email) {
+            privateNote.isOfficial = false;
+            return privateNote;
+          }
+          return null;
+        }
       }
     }
   } catch (err) {
@@ -303,7 +415,18 @@ async function getNote(id) {
       const docSnap = await docRef.get();
       if (docSnap.exists) {
         const note = docSnap.data();
-        note.isOfficial = true;
+
+        // If cloud note is private, enforce ownership
+        if (note.isOfficial === false || note.scope === 'private') {
+          const ownerEmail = (note.userEmail || note.uploadedBy || '').toLowerCase().trim();
+          const ownerUid = note.uploaderUid || note.userId || '';
+          const isOwner = (currentUser.uid && ownerUid === currentUser.uid) ||
+                          (currentUser.email && ownerEmail === currentUser.email);
+          if (!isOwner) return null;
+          note.isOfficial = false;
+        } else {
+          note.isOfficial = true;
+        }
 
         if (note.hasChunks) {
           const chunkSnap = await docRef.collection('chunks').orderBy('index', 'asc').get();
@@ -325,30 +448,41 @@ async function getNote(id) {
 
 /**
  * Delete a note:
- * - If Private Note: Any student can delete their own private note.
+ * - If Private Note: Owner can delete their own private note.
  * - If Official Cloud Note: ONLY Admin is allowed to delete!
  */
 async function deleteNote(id) {
-  // 1. Try deleting from Student's Private Vault
+  const currentUser = getCurrentUserInfo();
+
+  // 1. Try deleting from Private Vault (IndexedDB)
   try {
     const localDb = await openPrivateDB();
     if (localDb) {
-      const exists = await new Promise((resolve) => {
+      const existing = await new Promise((resolve) => {
         const tx = localDb.transaction(LOCAL_STORE_NAME, 'readonly');
         const req = tx.objectStore(LOCAL_STORE_NAME).get(id);
-        req.onsuccess = () => resolve(!!req.result);
-        req.onerror = () => resolve(false);
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => resolve(null);
       });
 
-      if (exists) {
-        await new Promise((resolve) => {
-          const tx = localDb.transaction(LOCAL_STORE_NAME, 'readwrite');
-          tx.objectStore(LOCAL_STORE_NAME).delete(id);
-          tx.oncomplete = () => resolve();
-          tx.onerror = () => resolve();
-        });
-        console.log('🗑️ Deleted private note:', id);
-        return;
+      if (existing) {
+        const ownerEmail = (existing.userEmail || existing.ownerEmail || '').toLowerCase().trim();
+        const ownerUid = existing.userId || existing.uploaderUid || '';
+        const isOwner = !ownerEmail ||
+                        (currentUser.uid && ownerUid === currentUser.uid) ||
+                        (currentUser.email && ownerEmail === currentUser.email) ||
+                        currentUser.isAdmin;
+
+        if (isOwner) {
+          await new Promise((resolve) => {
+            const tx = localDb.transaction(LOCAL_STORE_NAME, 'readwrite');
+            tx.objectStore(LOCAL_STORE_NAME).delete(id);
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => resolve();
+          });
+          console.log('🗑️ Deleted private note:', id);
+          return;
+        }
       }
     }
   } catch (err) {
@@ -356,7 +490,7 @@ async function deleteNote(id) {
   }
 
   // 2. If it's a Cloud Note, check Admin permission
-  if (!isAdmin()) {
+  if (!currentUser.isAdmin) {
     throw new Error('Unauthorized: Only Admin can delete Official OffStudy materials.');
   }
 
