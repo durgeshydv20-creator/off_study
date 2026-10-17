@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Upload your study material to OffStudy — PDFs, documents, images and more.">
+  <title>Upload — OffStudy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    .upload-page-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: calc(var(--navbar-h) + 48px) clamp(16px,6vw,80px) 80px;
+      position: relative;
+      z-index: 1;
+    }
+    .upload-page-wrap::before {
+      content: '';
+      position: absolute;
+      top: 40%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(0,119,182,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .upload-card {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--radius-lg);
+      padding: 48px;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+    }
+    .upload-card-header { margin-bottom: 36px; }
+    .upload-card-title {
+      font-size: 28px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+    .upload-card-sub { font-size: 14px; color: var(--muted); }
+    .upload-progress-bar {
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 24px 0;
+      overflow: hidden;
+    }
+    .upload-progress-fill {
+      height: 100%;
+      background: var(--gradient);
+      width: 0%;
+      transition: width 0.4s ease;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar" role="navigation">
+  <a href="index.html" class="nav-brand">
+    <div class="nav-logo">OS</div>
+    <span class="nav-brand-name">OFF<span>STUDY</span></span>
+  </a>
+  <div class="nav-links" role="list">
+    <a href="index.html"    class="nav-link">Home</a>
+    <a href="notes.html"    class="nav-link">My Notes</a>
+    <a href="subjects.html" class="nav-link">Subjects</a>
+    <a href="upload.html"   class="nav-link">Upload</a>
+    <a href="about.html"    class="nav-link">About</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-search-wrapper">
+      <button id="nav-search-btn" aria-label="Toggle search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      </button>
+      <div id="nav-search-bar"><input type="text" placeholder="Search notes…" id="nav-search-input"></div>
+    </div>
+    <a href="login.html" class="btn-auth" id="nav-auth-btn">LOGIN</a>
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+      <span class="hamburger-line"></span><span class="hamburger-line"></span><span class="hamburger-line"></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="index.html" class="nav-link">Home</a>
+  <a href="notes.html" class="nav-link">My Notes</a>
+  <a href="subjects.html" class="nav-link">Subjects</a>
+  <a href="upload.html" class="nav-link">Upload</a>
+  <a href="about.html" class="nav-link">About</a>
+  <div class="mobile-menu-divider"></div>
+  <a href="login.html" class="btn-auth" id="nav-auth-btn-mobile" style="text-align:center;">LOGIN</a>
+</div>
+
+<!-- UPLOAD PAGE -->
+<main class="upload-page-wrap">
+  <div class="upload-card" data-animate>
+    <div class="upload-card-header">
+      <div class="section-tag" style="margin-bottom:12px;">Upload System</div>
+      <h1 class="upload-card-title">Upload Study<br><span style="color:var(--accent)">Material</span></h1>
+      <p class="upload-card-sub">Add PDFs, documents, presentations or images to your personal vault.</p>
+    </div>
+
+    <div class="upload-progress-bar">
+      <div class="upload-progress-fill" id="upload-progress-fill"></div>
+    </div>
+
+    <form id="upload-form" novalidate>
+      <div id="upload-scope-container"></div>
+      <div class="form-group">
+        <label class="form-label" for="note-title">Title *</label>
+        <input type="text" id="note-title" class="form-input" placeholder="e.g. Data Structures Unit 2" maxlength="120" autocomplete="off">
+        <div class="field-error" id="title-error"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="note-subject">Subject *</label>
+        <input type="text" id="note-subject" class="form-input" placeholder="e.g. Data Structures" list="subject-list" maxlength="60" autocomplete="off">
+        <datalist id="subject-list">
+          <option value="C++"><option value="Java"><option value="Python">
+          <option value="Data Structures"><option value="Database">
+          <option value="Digital Logic"><option value="Microprocessor">
+          <option value="Mathematics"><option value="Physics">
+        </datalist>
+        <div class="field-error" id="subject-error"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="note-desc">Description</label>
+        <textarea id="note-desc" class="form-textarea" placeholder="Briefly describe the content of this material…" rows="3" maxlength="400"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">File *</label>
+        <div class="drop-zone" id="drop-zone" tabindex="0" role="button" aria-label="Drop file or click to browse">
+          <div class="drop-zone-icon" aria-hidden="true">📁</div>
+          <div class="drop-zone-text">DROP YOUR FILE HERE</div>
+          <div class="drop-zone-sub">or</div>
+          <button type="button" id="browse-btn" class="btn-secondary btn-sm">BROWSE FILES</button>
+          <div class="drop-zone-types">All file types supported · Documents, Media, Code, Archives & more</div>
+          <div id="file-info">
+            <span id="file-type-icon">FILE</span>
+            <span id="file-name">filename.ext</span>
+            <span id="file-size">2.4 MB</span>
+          </div>
+        </div>
+        <input type="file" id="file-input" style="display:none" aria-hidden="true">
+        <div class="field-error" id="file-error"></div>
+      </div>
+    </form>
+
+    <div style="display:flex; gap:12px; margin-top:28px; justify-content:flex-end;">
+      <a href="notes.html" class="btn-secondary">CANCEL</a>
+      <button class="btn-primary" id="upload-submit-btn">
+        UPLOAD
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </button>
+    </div>
+
+    <div style="margin-top:28px; padding-top:20px; border-top:1px solid var(--border); text-align:center;">
+      <p style="font-size:12px; color:var(--muted);">
+        Files are stored locally in your browser using IndexedDB.<br>
+        All file formats accepted up to 200 MB.
+      </p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer"><div class="footer-inner"><div class="footer-bottom"><p class="footer-copy">© 2026 <span class="footer-accent">OffStudy</span>. All rights reserved.</p><a href="notes.html" class="footer-copy" style="color:var(--muted)">← View My Notes</a></div></div></footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/upload.js"></script>
+<script>
+/* Upload page: require login, then handle upload submit */
+
+// Mark this page so app.js doesn't start a second generic auth observer
+document.documentElement.setAttribute('data-auth-observer-started', 'true');
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Require authentication — unauthenticated users are redirected to login
+  if (window.OffStudyAuth) {
+    OffStudyAuth.initAuthObserver({ requireAuth: true });
+  }
+
+  const progressFill = document.getElementById('upload-progress-fill');
+  const submitBtn = document.getElementById('upload-submit-btn');
+  if (!submitBtn) return;
+
+  submitBtn.addEventListener('click', async () => {
+    if (progressFill) progressFill.style.width = '30%';
+    const success = await submitUpload();
+    if (success) {
+      if (progressFill) progressFill.style.width = '100%';
+      setTimeout(() => { window.location.href = 'notes.html'; }, 1200);
+    } else {
+      if (progressFill) progressFill.style.width = '0%';
+    }
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="OffStudy — Your personal academic workspace. Upload, organize, search and manage all your notes, PDFs, and study material in one powerful platform.">
+  <title>OffStudy — Learn. Organize. Master.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<!-- ═══════════════════════ NAVBAR ═══════════════════════════════════════════ -->
+<nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+  <a href="index.html" class="nav-brand" aria-label="OffStudy Home">
+    <div class="nav-logo" aria-hidden="true">OS</div>
+    <span class="nav-brand-name">OFF<span>STUDY</span></span>
+  </a>
+
+  <div class="nav-links" role="list">
+    <a href="index.html"    class="nav-link" role="listitem">Home</a>
+    <a href="notes.html"    class="nav-link" role="listitem">My Notes</a>
+    <a href="subjects.html" class="nav-link" role="listitem">Subjects</a>
+    <a href="upload.html"   class="nav-link" role="listitem">Upload</a>
+    <a href="about.html"    class="nav-link" role="listitem">About</a>
+  </div>
+
+  <div class="nav-right">
+    <div class="nav-search-wrapper">
+      <button id="nav-search-btn" aria-label="Toggle search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      </button>
+      <div id="nav-search-bar">
+        <input type="text" placeholder="Search notes… (press Enter)" id="nav-search-input" aria-label="Search notes">
+      </div>
+    </div>
+    <a href="login.html" class="btn-auth" id="nav-auth-btn">LOGIN</a>
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Nav -->
+<div class="mobile-menu" id="mobile-menu" role="dialog" aria-label="Mobile navigation">
+  <a href="index.html"    class="nav-link">Home</a>
+  <a href="notes.html"    class="nav-link">My Notes</a>
+  <a href="subjects.html" class="nav-link">Subjects</a>
+  <a href="upload.html"   class="nav-link">Upload</a>
+  <a href="about.html"    class="nav-link">About</a>
+  <div class="mobile-menu-divider"></div>
+  <a href="login.html" class="btn-auth" id="nav-auth-btn-mobile" style="text-align:center;">LOGIN</a>
+</div>
+
+<!-- ═══════════════════════ HERO ════════════════════════════════════════════ -->
+<section class="hero" id="home" aria-label="Hero section">
+  <div class="hero-inner">
+
+    <!-- Left: Content -->
+    <div class="hero-content" id="hero-content">
+      <div class="hero-badge" data-animate>YOUR PERSONAL STUDY PLATFORM</div>
+
+      <h1 class="hero-heading" data-animate>
+        LEARN.<br>
+        <span class="accent-word">ORGANIZE.</span>
+        MASTER.
+      </h1>
+
+      <p class="hero-sub" data-animate>
+        All your notes, PDFs, assignments and study material —
+        organized in one powerful workspace, always at your fingertips.
+      </p>
+
+      <div class="hero-actions" data-animate>
+        <a href="notes.html" class="btn-primary">
+          EXPLORE NOTES <span class="btn-arrow">→</span>
+        </a>
+        <button class="btn-secondary" data-open-upload>
+          UPLOAD MATERIAL
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: Visual -->
+    <div class="hero-visual" aria-hidden="true">
+      <!-- Central laptop SVG illustration -->
+      <svg class="hero-laptop" viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Screen body -->
+        <rect x="20" y="10" width="280" height="175" rx="10" fill="#0d0d0f" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+        <!-- Screen inner -->
+        <rect x="30" y="20" width="260" height="155" rx="6" fill="#080809"/>
+        <!-- Screen content lines (notes) -->
+        <rect x="45" y="38" width="90" height="6" rx="3" fill="#0077B6" opacity="0.7"/>
+        <rect x="45" y="52" width="230" height="4" rx="2" fill="rgba(255,255,255,0.12)"/>
+        <rect x="45" y="62" width="180" height="4" rx="2" fill="rgba(255,255,255,0.08)"/>
+        <rect x="45" y="72" width="200" height="4" rx="2" fill="rgba(255,255,255,0.08)"/>
+        <!-- Card 1 -->
+        <rect x="45" y="90" width="110" height="60" rx="6" fill="#141416" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+        <rect x="55" y="100" width="40" height="5" rx="2" fill="#0077B6" opacity="0.6"/>
+        <rect x="55" y="110" width="90" height="4" rx="2" fill="rgba(255,255,255,0.15)"/>
+        <rect x="55" y="120" width="70" height="4" rx="2" fill="rgba(255,255,255,0.08)"/>
+        <rect x="55" y="136" width="35" height="7" rx="3" fill="rgba(0,119,182,0.2)" stroke="rgba(0,119,182,0.3)" stroke-width="0.5"/>
+        <!-- Card 2 -->
+        <rect x="165" y="90" width="110" height="60" rx="6" fill="#141416" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+        <rect x="175" y="100" width="40" height="5" rx="2" fill="#00B4D8" opacity="0.6"/>
+        <rect x="175" y="110" width="90" height="4" rx="2" fill="rgba(255,255,255,0.15)"/>
+        <rect x="175" y="120" width="60" height="4" rx="2" fill="rgba(255,255,255,0.08)"/>
+        <rect x="175" y="136" width="35" height="7" rx="3" fill="rgba(0,180,216,0.2)" stroke="rgba(0,180,216,0.3)" stroke-width="0.5"/>
+        <!-- Bottom bar -->
+        <rect x="45" y="160" width="230" height="5" rx="2" fill="rgba(0,119,182,0.15)"/>
+        <!-- Keyboard base -->
+        <rect x="0" y="185" width="320" height="18" rx="4" fill="#0a0a0c" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+        <!-- Keyboard trackpad -->
+        <rect x="120" y="188" width="80" height="11" rx="3" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.07)" stroke-width="0.5"/>
+      </svg>
+
+      <!-- Floating glass cards -->
+      <div class="float-card float-card-1">
+        <div class="fc-label">Total Notes</div>
+        <div class="fc-value" id="hero-note-count">24</div>
+        <div class="fc-sub"><span class="fc-dot"></span>Stored locally</div>
+      </div>
+
+      <div class="float-card float-card-2">
+        <div class="fc-label">Latest Upload</div>
+        <div class="fc-value" style="font-size:14px; font-weight:600;">Physics Notes</div>
+        <div class="fc-tag">PDF</div>
+      </div>
+
+      <div class="float-card float-card-3">
+        <div class="fc-label">Subjects Covered</div>
+        <div class="fc-value">8</div>
+        <div class="fc-sub">Across all courses</div>
+      </div>
+
+      <div class="float-card float-card-4">
+        <div class="fc-label">Study Streak</div>
+        <div class="fc-value">🔥 7 days</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════ STATS ════════════════════════════════════════════ -->
+<section class="section" id="stats" aria-label="Quick statistics">
+  <div class="section-inner">
+    <div class="stats-grid">
+
+      <div class="stat-card" data-animate>
+        <div class="stat-icon" aria-hidden="true">📄</div>
+        <div class="stat-number" data-count="24" id="stat-notes">0</div>
+        <div class="stat-label">Total Notes</div>
+      </div>
+
+      <div class="stat-card" data-animate style="animation-delay:0.08s">
+        <div class="stat-icon" aria-hidden="true">📚</div>
+        <div class="stat-number" data-count="8" id="stat-subjects">0</div>
+        <div class="stat-label">Subjects</div>
+      </div>
+
+      <div class="stat-card" data-animate style="animation-delay:0.16s">
+        <div class="stat-icon" aria-hidden="true">📑</div>
+        <div class="stat-number" data-count="17" id="stat-pdfs">0</div>
+        <div class="stat-label">PDF Files</div>
+      </div>
+
+      <div class="stat-card" data-animate style="animation-delay:0.24s">
+        <div class="stat-icon" aria-hidden="true">⬆</div>
+        <div class="stat-number" data-count="5" id="stat-recent">0</div>
+        <div class="stat-label">Recent Uploads</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ LATEST MATERIAL ═════════════════════════════════ -->
+<section class="section" id="latest" aria-label="Latest study material">
+  <div class="section-inner">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:start;">
+      <div>
+        <div class="section-header">
+          <div class="section-tag" data-animate>Recently Added</div>
+          <h2 class="section-title" data-animate>LATEST<br>MATERIAL</h2>
+          <p class="section-sub" data-animate>Your most recently uploaded study resources, always one click away.</p>
+        </div>
+
+        <div class="latest-list" id="latest-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Dashboard preview -->
+      <div data-animate style="animation-delay:0.2s">
+        <div class="browser-window">
+          <div class="browser-bar">
+            <div class="browser-dots">
+              <div class="browser-dot red"></div>
+              <div class="browser-dot yellow"></div>
+              <div class="browser-dot green"></div>
+            </div>
+            <div class="browser-url">offstudy.app/dashboard</div>
+          </div>
+          <div class="browser-body">
+            <div class="dash-sidebar">
+              <div class="dash-sidebar-brand">
+                <div class="logo-mini">OS</div>
+                OFFSTUDY
+              </div>
+              <div class="dash-nav-item active">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Dashboard
+              </div>
+              <div class="dash-nav-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                My Notes
+              </div>
+              <div class="dash-nav-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+                Subjects
+              </div>
+              <div class="dash-nav-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload
+              </div>
+              <div class="dash-nav-item">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 115 19.07 10 10 0 0119.07 4.93z"/></svg>
+                Settings
+              </div>
+            </div>
+            <div class="dash-main">
+              <div class="dash-main-title">Dashboard</div>
+              <div class="dash-mini-stats">
+                <div class="dash-mini-stat">
+                  <div class="dash-mini-num" id="dash-notes">24</div>
+                  <div class="dash-mini-lbl">Notes</div>
+                </div>
+                <div class="dash-mini-stat">
+                  <div class="dash-mini-num">18.5</div>
+                  <div class="dash-mini-lbl">Study Hrs</div>
+                </div>
+                <div class="dash-mini-stat">
+                  <div class="dash-mini-num">8</div>
+                  <div class="dash-mini-lbl">Subjects</div>
+                </div>
+              </div>
+              <div class="dash-recent-title">RECENT FILES</div>
+              <div class="dash-file-row">
+                <div class="dash-file-icon">📄</div>
+                <div class="dash-file-name">Physics Notes</div>
+                <div class="dash-file-date">Just now</div>
+              </div>
+              <div class="dash-file-row">
+                <div class="dash-file-icon">📑</div>
+                <div class="dash-file-name">Eng Math U4</div>
+                <div class="dash-file-date">Today</div>
+              </div>
+              <div class="dash-file-row">
+                <div class="dash-file-icon">📄</div>
+                <div class="dash-file-name">DBMS Unit 3</div>
+                <div class="dash-file-date">Yesterday</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ SUBJECTS ════════════════════════════════════════ -->
+<section class="section" id="subjects-preview" aria-label="Browse by subject">
+  <div class="section-inner">
+    <div class="section-header text-center" style="max-width:100%">
+      <div class="section-tag" data-animate>Browse by Subject</div>
+      <h2 class="section-title" data-animate>EXPLORE BY<br>SUBJECT</h2>
+      <p class="section-sub" data-animate style="max-width:100%; text-align:center;">Dive into your notes organized by course. Find what you need instantly.</p>
+    </div>
+
+    <div class="subjects-grid" id="subjects-preview-grid">
+      <!-- Populated by JS -->
+    </div>
+
+    <div style="text-align:center; margin-top:40px;" data-animate>
+      <a href="subjects.html" class="btn-secondary">VIEW ALL SUBJECTS <span class="btn-arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ ABOUT / FEATURES ════════════════════════════════ -->
+<section class="section" id="about-preview" aria-label="About OffStudy">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div class="about-text">
+        <div class="section-tag" data-animate>About</div>
+        <h2 class="section-title" data-animate>BUILT FOR<br>STUDENTS.</h2>
+        <p data-animate>
+          OffStudy is your personal digital workspace for keeping notes, PDFs, assignments
+          and study resources organized and accessible whenever you need them.
+        </p>
+        <p data-animate style="animation-delay:0.1s">
+          No more digging through folders or email attachments. Every piece of material you upload
+          is stored locally in your browser, organized by subject, and searchable in seconds.
+        </p>
+        <div style="margin-top:32px;" data-animate style="animation-delay:0.15s">
+          <a href="about.html" class="btn-primary">LEARN MORE <span class="btn-arrow">→</span></a>
+        </div>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card" data-animate>
+          <div class="feature-icon-wrap" aria-hidden="true">📂</div>
+          <div>
+            <div class="feature-name">Organize</div>
+            <div class="feature-desc">Keep your study material structured by subject, with intuitive filtering and sorting.</div>
+          </div>
+        </div>
+        <div class="feature-card" data-animate style="animation-delay:0.08s">
+          <div class="feature-icon-wrap" aria-hidden="true">🔍</div>
+          <div>
+            <div class="feature-name">Search</div>
+            <div class="feature-desc">Find any note in seconds with real-time full-text search across titles, subjects and descriptions.</div>
+          </div>
+        </div>
+        <div class="feature-card" data-animate style="animation-delay:0.16s">
+          <div class="feature-icon-wrap" aria-hidden="true">🗂️</div>
+          <div>
+            <div class="feature-name">Access</div>
+            <div class="feature-desc">Your material is always available in one clean workspace, stored privately in your browser.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ CREATOR SHOWCASE ══════════════════════════════ -->
+<section class="creator-section" id="creator" aria-label="Creator Showcase">
+  <div class="creator-container">
+    <div class="creator-card" data-animate>
+      <img src="assets/durgesh.jpg" alt="Durgesh Yadav" class="creator-card-img" loading="lazy">
+      <div class="creator-card-overlay"></div>
+      <div class="creator-card-content">
+        <h2 class="creator-name">DURGESH YADAV</h2>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ FOOTER ══════════════════════════════════════════ -->
+<footer class="footer" aria-label="Site footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-icon">OS</div>
+          OFFSTUDY
+        </div>
+        <p class="footer-tagline">Your notes. Your knowledge. Your workspace.</p>
+      </div>
+
+      <div class="footer-links-group">
+        <div class="footer-links-title">Navigation</div>
+        <a href="index.html"    class="footer-link">Home</a>
+        <a href="notes.html"    class="footer-link">My Notes</a>
+        <a href="subjects.html" class="footer-link">Subjects</a>
+        <a href="upload.html"   class="footer-link">Upload</a>
+        <a href="about.html"    class="footer-link">About</a>
+      </div>
+
+      <div class="footer-links-group">
+        <div class="footer-links-title">Quick Actions</div>
+        <a href="notes.html"  class="footer-link">Browse Notes</a>
+        <button class="footer-link" data-open-upload style="text-align:left; font-size:13px;">Upload Material</button>
+        <a href="login.html"  class="footer-link">Login / Register</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2026 <span class="footer-accent">OffStudy</span>. All rights reserved.</p>
+      <p class="footer-copy" style="font-size:11px;">Built for students, by students.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════ UPLOAD MODAL ════════════════════════════════════ -->
+<div class="modal-overlay" id="upload-modal" role="dialog" aria-modal="true" aria-labelledby="upload-modal-title">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2 class="modal-title" id="upload-modal-title">Upload Study Material</h2>
+      <button class="modal-close" id="upload-cancel-btn" aria-label="Close modal">✕</button>
+    </div>
+
+    <form id="upload-form" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="note-title">Title *</label>
+        <input type="text" id="note-title" class="form-input" placeholder="e.g. Data Structures Unit 2" maxlength="120">
+        <div class="field-error" id="title-error"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="note-subject">Subject *</label>
+        <input type="text" id="note-subject" class="form-input" placeholder="e.g. Data Structures" list="subject-list" maxlength="60">
+        <datalist id="subject-list">
+          <option value="C++"><option value="Java"><option value="Python">
+          <option value="Data Structures"><option value="Database">
+          <option value="Digital Logic"><option value="Microprocessor">
+          <option value="Mathematics"><option value="Physics">
+        </datalist>
+        <div class="field-error" id="subject-error"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="note-desc">Description</label>
+        <textarea id="note-desc" class="form-textarea" placeholder="Brief description of the content…" rows="3" maxlength="400"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">File *</label>
+        <div class="drop-zone" id="drop-zone">
+          <div class="drop-zone-icon" aria-hidden="true">📁</div>
+          <div class="drop-zone-text">DROP YOUR FILE HERE</div>
+          <div class="drop-zone-sub">or</div>
+          <button type="button" id="browse-btn">BROWSE FILES</button>
+          <div class="drop-zone-types">All file types supported · Documents, Media, Code, Archives & more</div>
+          <div id="file-info">
+            <span id="file-type-icon">FILE</span>
+            <span id="file-name">filename.ext</span>
+            <span id="file-size">2.4 MB</span>
+          </div>
+        </div>
+        <input type="file" id="file-input" style="display:none" aria-hidden="true">
+        <div class="field-error" id="file-error"></div>
+      </div>
+    </form>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" id="upload-cancel-btn" onclick="document.getElementById('upload-modal').classList.remove('open'); document.body.style.overflow=''">CANCEL</button>
+      <button class="btn-primary" id="upload-submit-btn">
+        UPLOAD
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SCRIPTS ══════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+<script src="js/upload.js"></script>
+
+<script>
+/* Index page: populate latest list and subjects preview from real user uploads */
+document.addEventListener('DOMContentLoaded', async () => {
+  const notes = await OffStudyDB.getNotes();
+  const subjectData = await OffStudyDB.getSubjects();
+
+  // Dynamic stat cards
+  const statNotes = document.getElementById('stat-notes');
+  const statSubjects = document.getElementById('stat-subjects');
+  const statPdfs = document.getElementById('stat-pdfs');
+  const statRecent = document.getElementById('stat-recent');
+
+  const pdfCount = notes.filter(n => (n.fileType || '').toUpperCase() === 'PDF').length;
+  const subjectCount = Object.keys(subjectData).length;
+
+  if (statNotes) { statNotes.dataset.count = notes.length; statNotes.textContent = notes.length; }
+  if (statSubjects) { statSubjects.dataset.count = subjectCount; statSubjects.textContent = subjectCount; }
+  if (statPdfs) { statPdfs.dataset.count = pdfCount; statPdfs.textContent = pdfCount; }
+  if (statRecent) { const rec = Math.min(notes.length, 5); statRecent.dataset.count = rec; statRecent.textContent = rec; }
+
+  // Latest material list
+  const latestList = document.getElementById('latest-list');
+  if (latestList) {
+    if (notes.length) {
+      const latest = notes.slice(0, 5);
+      latestList.innerHTML = latest.map((n, i) => `
+        <div class="latest-item" data-animate style="animation-delay:${i * 0.07}s">
+          <div class="latest-num">${String(i+1).padStart(2,'0')}</div>
+          <div class="latest-info">
+            <div class="latest-title">${n.title}</div>
+            <div class="latest-meta">${n.fileType}${n.pages ? ' · ' + n.pages + ' pages' : ''}</div>
+          </div>
+          <div class="latest-time">${SV.relativeTime(n.uploadDate)}</div>
+        </div>
+      `).join('');
+    } else {
+      latestList.innerHTML = `
+        <div style="text-align:center; padding:36px 20px; color:var(--muted); background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);">
+          <div style="font-size:32px; margin-bottom:12px;">📂</div>
+          <div style="font-weight:600; color:var(--text); margin-bottom:6px; font-size:15px;">No study materials uploaded yet</div>
+          <p style="font-size:13px; margin-bottom:18px; color:var(--muted);">Upload your notes, PDFs, or files to start building your personal library.</p>
+          <a href="upload.html" class="btn-primary btn-sm">UPLOAD MATERIAL</a>
+        </div>
+      `;
+    }
+
+    latestList.querySelectorAll('[data-animate]').forEach(el => {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('animated'); obs.unobserve(e.target); } });
+      }, { threshold: 0.05 });
+      obs.observe(el);
+    });
+  }
+
+  // Update hero count
+  const heroCount = document.getElementById('hero-note-count');
+  if (heroCount) heroCount.textContent = notes.length;
+
+  // Subjects preview
+  const subjectGrid = document.getElementById('subjects-preview-grid');
+  const ICONS = { 'C++':'⚙️','Java':'☕','Python':'🐍','Data Structures':'🌲','Database':'🗄️','Digital Logic':'⚡','Microprocessor':'💾','Mathematics':'∑','Physics':'⚛️' };
+  const subjects = Object.entries(subjectData).slice(0, 8);
+
+  if (subjectGrid) {
+    if (subjects.length) {
+      subjectGrid.innerHTML = subjects.map(([sub, count], i) => `
+        <a href="subjects.html?s=${encodeURIComponent(sub)}" class="subject-card" data-animate style="animation-delay:${i*0.06}s" title="Browse ${sub} notes">
+          <div class="subject-icon-wrap">${ICONS[sub] || '📄'}</div>
+          <div class="subject-name">${sub}</div>
+          <div class="subject-count">${count} NOTE${count !== 1 ? 'S' : ''}</div>
+          <span class="subject-arrow">→</span>
+        </a>
+      `).join('');
+    } else {
+      subjectGrid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align:center; padding:36px 20px; color:var(--muted); background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);">
+          <div style="font-size:32px; margin-bottom:12px;">📚</div>
+          <div style="font-weight:600; color:var(--text); margin-bottom:6px; font-size:15px;">No subjects added yet</div>
+          <p style="font-size:13px; margin-bottom:18px; color:var(--muted);">Subjects will be created automatically when you upload your notes.</p>
+          <a href="upload.html" class="btn-primary btn-sm">UPLOAD YOUR FIRST NOTE</a>
+        </div>
+      `;
+    }
+
+    subjectGrid.querySelectorAll('[data-animate]').forEach(el => {
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('animated'); obs.unobserve(e.target); } });
+      }, { threshold: 0.05 });
+      obs.observe(el);
+    });
+  }
+});
+</script>
+
+</body>
+</html>

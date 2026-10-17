@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Login or register to OffStudy — your personal academic notes platform.">
+  <title>Login — OffStudy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    /* Extra login page glow effects */
+    .auth-form .form-input:focus { box-shadow: 0 0 0 3px rgba(0,119,182,0.12); }
+    .login-left-features { display: flex; flex-direction:column; gap:14px; margin-top:40px; }
+
+    /* Loading spinner on button */
+    .btn-loading {
+      position: relative;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+    .btn-loading::after {
+      content: '';
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+
+    /* Reset password panel */
+    #panel-reset { display: none; }
+    .reset-success {
+      padding: 14px;
+      background: rgba(0,180,100,0.1);
+      border: 1px solid rgba(0,180,100,0.3);
+      border-radius: 8px;
+      color: #00b464;
+      font-size: 13px;
+      text-align: center;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-page">
+
+  <!-- ─── Left panel ──────────────────────────────────────────────────── -->
+  <aside class="login-left" aria-label="OffStudy branding">
+    <div class="login-brand">
+      <div class="logo-icon">OS</div>
+      OFFSTUDY
+    </div>
+
+    <h1 class="login-heading">
+      YOUR KNOWLEDGE,<br>
+      <span class="accent">ORGANIZED.</span>
+    </h1>
+    <p class="login-sub">
+      Join thousands of students who manage their notes, PDFs, and study material
+      in one powerful personal workspace.
+    </p>
+
+    <div class="login-left-features">
+      <div class="login-feature">
+        <div class="lf-dot"></div>
+        Upload PDFs, documents and images
+      </div>
+      <div class="login-feature">
+        <div class="lf-dot"></div>
+        Organize notes by subject
+      </div>
+      <div class="login-feature">
+        <div class="lf-dot"></div>
+        Search across all your material instantly
+      </div>
+      <div class="login-feature">
+        <div class="lf-dot"></div>
+        Access everything from one clean workspace
+      </div>
+    </div>
+  </aside>
+
+  <!-- ─── Right panel ─────────────────────────────────────────────────── -->
+  <main class="login-right" aria-label="Authentication form">
+    <div class="auth-card">
+
+      <div class="auth-title" id="auth-title">Welcome Back</div>
+      <div class="auth-sub" id="auth-sub">Sign in to your OffStudy account.</div>
+
+      <!-- Toggle tabs -->
+      <div class="auth-toggle" role="tablist" aria-label="Login or Register" id="auth-tabs">
+        <button class="auth-tab active" id="tab-login" role="tab" aria-selected="true" aria-controls="panel-login">LOGIN</button>
+        <button class="auth-tab" id="tab-register" role="tab" aria-selected="false" aria-controls="panel-register">REGISTER</button>
+      </div>
+
+      <!-- ─── Login form ────────────────────────────────────────────── -->
+      <div id="panel-login" role="tabpanel" aria-labelledby="tab-login">
+        <form class="auth-form" id="login-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="login-email">Email Address</label>
+            <input type="email" id="login-email" class="form-input" placeholder="you@example.com" autocomplete="email" required>
+            <div class="field-error" id="login-email-error"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="login-password">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="login-password" class="form-input" placeholder="Enter your password" autocomplete="current-password" required>
+              <button type="button" id="toggle-login-pass" aria-label="Toggle password visibility" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);background:none;border:none;cursor:pointer;font-size:16px;">👁</button>
+            </div>
+            <div class="field-error" id="login-pass-error"></div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; font-size:12px; color:var(--muted);">
+            <label style="display:flex; align-items:center; gap:6px; cursor:pointer;">
+              <input type="checkbox" id="remember-me" style="accent-color:var(--accent)"> Remember me
+            </label>
+            <a href="#" class="auth-link" id="forgot-link">Forgot password?</a>
+          </div>
+          <button type="submit" class="btn-primary auth-submit" id="login-submit-btn">
+            SIGN IN <span class="btn-arrow">→</span>
+          </button>
+          <div class="field-error" id="login-general-error" style="text-align:center;"></div>
+        </form>
+        <p class="auth-link-text">Don't have an account? <span class="auth-link" id="go-register">Create one →</span></p>
+
+        <div style="margin-top:20px; padding:12px 14px; background:rgba(0,119,182,0.08); border:1px solid rgba(0,180,216,0.3); border-radius:var(--radius-sm); font-size:12px; line-height:1.5;">
+          <div style="font-weight:700; color:#00B4D8; margin-bottom:2px;">👑 Creator / Admin Portal:</div>
+          <div style="color:var(--text-soft);">Login with <code>admin@offstudy.com</code> to publish official notes to Cloud for all students.</div>
+        </div>
+      </div>
+
+      <!-- ─── Register form ─────────────────────────────────────────── -->
+      <div id="panel-register" role="tabpanel" aria-labelledby="tab-register" style="display:none">
+        <form class="auth-form" id="register-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" class="form-input" placeholder="Your full name" autocomplete="name" required maxlength="60">
+            <div class="field-error" id="reg-name-error"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-email">Email Address</label>
+            <input type="email" id="reg-email" class="form-input" placeholder="you@example.com" autocomplete="email" required>
+            <div class="field-error" id="reg-email-error"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-password">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="reg-password" class="form-input" placeholder="Create a strong password (min 6 chars)" autocomplete="new-password" required minlength="6">
+              <button type="button" id="toggle-reg-pass" aria-label="Toggle password visibility" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);background:none;border:none;cursor:pointer;font-size:16px;">👁</button>
+            </div>
+            <div class="field-error" id="reg-pass-error"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-confirm">Confirm Password</label>
+            <input type="password" id="reg-confirm" class="form-input" placeholder="Repeat your password" autocomplete="new-password" required>
+            <div class="field-error" id="reg-confirm-error"></div>
+          </div>
+          <button type="submit" class="btn-primary auth-submit" id="register-submit-btn">
+            CREATE ACCOUNT <span class="btn-arrow">→</span>
+          </button>
+          <div class="field-error" id="reg-general-error" style="text-align:center;"></div>
+        </form>
+        <p class="auth-link-text">Already have an account? <span class="auth-link" id="go-login">Sign in →</span></p>
+      </div>
+
+      <!-- ─── Reset password panel ──────────────────────────────────── -->
+      <div id="panel-reset" role="tabpanel">
+        <form class="auth-form" id="reset-form" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="reset-email">Email Address</label>
+            <input type="email" id="reset-email" class="form-input" placeholder="you@example.com" autocomplete="email" required>
+            <div class="field-error" id="reset-email-error"></div>
+          </div>
+          <button type="submit" class="btn-primary auth-submit" id="reset-submit-btn">
+            SEND RESET LINK <span class="btn-arrow">→</span>
+          </button>
+          <div class="field-error" id="reset-general-error" style="text-align:center;"></div>
+          <div class="reset-success" id="reset-success" style="display:none">
+            ✅ Reset email sent! Check your inbox.
+          </div>
+        </form>
+        <p class="auth-link-text"><span class="auth-link" id="go-login-from-reset">← Back to Login</span></p>
+      </div>
+
+    </div>
+
+    <p style="position:absolute;bottom:24px;font-size:11px;color:var(--muted);text-align:center;">
+      <a href="index.html" style="color:var(--muted); text-decoration:underline;">← Back to OffStudy</a>
+    </p>
+  </main>
+
+</div>
+
+<!-- Firebase Auth SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="js/auth.js"></script>
+<script>
+/* ─── Tab switching ─────────────────────────────────────────────────────── */
+function showTab(tab) {
+  const panelLogin    = document.getElementById('panel-login');
+  const panelRegister = document.getElementById('panel-register');
+  const panelReset    = document.getElementById('panel-reset');
+  const tabsEl        = document.getElementById('auth-tabs');
+
+  panelLogin.style.display    = 'none';
+  panelRegister.style.display = 'none';
+  panelReset.style.display    = 'none';
+
+  document.getElementById('tab-login').classList.remove('active');
+  document.getElementById('tab-register').classList.remove('active');
+  document.getElementById('tab-login').setAttribute('aria-selected', false);
+  document.getElementById('tab-register').setAttribute('aria-selected', false);
+
+  if (tab === 'login') {
+    panelLogin.style.display = 'block';
+    document.getElementById('tab-login').classList.add('active');
+    document.getElementById('tab-login').setAttribute('aria-selected', true);
+    document.getElementById('auth-title').textContent = 'Welcome Back';
+    document.getElementById('auth-sub').textContent   = 'Sign in to your OffStudy account.';
+    tabsEl.style.display = 'flex';
+  } else if (tab === 'register') {
+    panelRegister.style.display = 'block';
+    document.getElementById('tab-register').classList.add('active');
+    document.getElementById('tab-register').setAttribute('aria-selected', true);
+    document.getElementById('auth-title').textContent = 'Create Account';
+    document.getElementById('auth-sub').textContent   = 'Join OffStudy — it\'s completely free.';
+    tabsEl.style.display = 'flex';
+  } else if (tab === 'reset') {
+    panelReset.style.display = 'block';
+    document.getElementById('auth-title').textContent = 'Reset Password';
+    document.getElementById('auth-sub').textContent   = 'We\'ll send a reset link to your email.';
+    tabsEl.style.display = 'none';
+  }
+}
+
+document.getElementById('tab-login').addEventListener('click', () => showTab('login'));
+document.getElementById('tab-register').addEventListener('click', () => showTab('register'));
+document.getElementById('go-register').addEventListener('click', () => showTab('register'));
+document.getElementById('go-login').addEventListener('click', () => showTab('login'));
+document.getElementById('go-login-from-reset').addEventListener('click', () => showTab('login'));
+document.getElementById('forgot-link').addEventListener('click', (e) => { e.preventDefault(); showTab('reset'); });
+
+/* ─── Password toggles ──────────────────────────────────────────────────── */
+function togglePass(inputId, btnId) {
+  const btn   = document.getElementById(btnId);
+  const input = document.getElementById(inputId);
+  if (!btn || !input) return;
+  btn.addEventListener('click', () => {
+    const isPass = input.type === 'password';
+    input.type = isPass ? 'text' : 'password';
+    btn.textContent = isPass ? '🙈' : '👁';
+  });
+}
+togglePass('login-password', 'toggle-login-pass');
+togglePass('reg-password',   'toggle-reg-pass');
+
+/* ─── Validation helpers ────────────────────────────────────────────────── */
+function setErr(id, msg)  { const el = document.getElementById(id); if(el) el.textContent = msg; }
+function clearErr(...ids) { ids.forEach(id => setErr(id, '')); }
+function isValidEmail(e)  { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.classList.toggle('btn-loading', loading);
+}
+
+/* ─── Login (Firebase Auth) ─────────────────────────────────────────────── */
+document.getElementById('login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearErr('login-email-error', 'login-pass-error', 'login-general-error');
+
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-password').value;
+
+  if (!email)           { setErr('login-email-error', 'Email is required.'); return; }
+  if (!isValidEmail(email)) { setErr('login-email-error', 'Enter a valid email address.'); return; }
+  if (!pass)            { setErr('login-pass-error', 'Password is required.'); return; }
+
+  setLoading('login-submit-btn', true);
+
+  try {
+    // Set persistence BEFORE signing in (Firebase requirement)
+    const rememberMe = document.getElementById('remember-me').checked;
+    await OffStudyAuth.auth.setPersistence(
+      rememberMe ? firebase.auth.Auth.Persistence.LOCAL : firebase.auth.Auth.Persistence.SESSION
+    );
+
+    await OffStudyAuth.auth.signInWithEmailAndPassword(email, pass);
+
+    // Redirect (onAuthStateChanged will fire and update navbar on next page)
+    const redirectTo = sessionStorage.getItem('sv_redirect_after_login') || 'index.html';
+    sessionStorage.removeItem('sv_redirect_after_login');
+    window.location.href = redirectTo;
+
+  } catch (err) {
+    console.error('Login error:', err);
+    setErr('login-general-error', OffStudyAuth.friendlyAuthError(err.code));
+    setLoading('login-submit-btn', false);
+  }
+});
+
+/* ─── Register (Firebase Auth) ──────────────────────────────────────────── */
+document.getElementById('register-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearErr('reg-name-error', 'reg-email-error', 'reg-pass-error', 'reg-confirm-error', 'reg-general-error');
+
+  const name    = document.getElementById('reg-name').value.trim();
+  const email   = document.getElementById('reg-email').value.trim();
+  const pass    = document.getElementById('reg-password').value;
+  const confirm = document.getElementById('reg-confirm').value;
+  let valid = true;
+
+  if (!name)                     { setErr('reg-name-error', 'Name is required.'); valid = false; }
+  if (!email)                    { setErr('reg-email-error', 'Email is required.'); valid = false; }
+  else if (!isValidEmail(email)) { setErr('reg-email-error', 'Enter a valid email address.'); valid = false; }
+  if (!pass || pass.length < 6)  { setErr('reg-pass-error', 'Password must be at least 6 characters.'); valid = false; }
+  if (pass !== confirm)          { setErr('reg-confirm-error', 'Passwords do not match.'); valid = false; }
+  if (!valid) return;
+
+  setLoading('register-submit-btn', true);
+
+  try {
+    const cred = await OffStudyAuth.auth.createUserWithEmailAndPassword(email, pass);
+
+    // Save display name to Firebase profile
+    await cred.user.updateProfile({ displayName: name });
+
+    // Redirect after registration
+    window.location.href = 'index.html';
+
+  } catch (err) {
+    console.error('Register error:', err);
+    setErr('reg-general-error', OffStudyAuth.friendlyAuthError(err.code));
+    setLoading('register-submit-btn', false);
+  }
+});
+
+/* ─── Password Reset (Firebase Auth) ───────────────────────────────────── */
+document.getElementById('reset-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearErr('reset-email-error', 'reset-general-error');
+  document.getElementById('reset-success').style.display = 'none';
+
+  const email = document.getElementById('reset-email').value.trim();
+  if (!email)               { setErr('reset-email-error', 'Email is required.'); return; }
+  if (!isValidEmail(email)) { setErr('reset-email-error', 'Enter a valid email address.'); return; }
+
+  setLoading('reset-submit-btn', true);
+
+  try {
+    await OffStudyAuth.auth.sendPasswordResetEmail(email);
+    document.getElementById('reset-success').style.display = 'block';
+    document.getElementById('reset-email').value = '';
+  } catch (err) {
+    console.error('Reset error:', err);
+    setErr('reset-general-error', OffStudyAuth.friendlyAuthError(err.code));
+  }
+
+  setLoading('reset-submit-btn', false);
+});
+
+/* ─── Redirect if already logged in ────────────────────────────────────── */
+// initAuthObserver with redirectIfLoggedIn=true handles this via onAuthStateChanged
+OffStudyAuth.initAuthObserver({ redirectIfLoggedIn: true });
+</script>
+
+</body>
+</html>
